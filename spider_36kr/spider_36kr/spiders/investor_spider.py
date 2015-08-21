@@ -113,10 +113,10 @@ class InvestorSpider(scrapy.Spider):
         item['investments'] = []
 
         for investment in data['data']:
-            self.investor_id += 1
+            self.investment_id += 1
 
             subitem                 = InvestmentItem()
-            subitem['id']           = self.investor_id
+            subitem['id']           = self.investment_id
             subitem['investor_id']  = item['id']
             subitem['kr_id']        = item['kr_id']
             subitem['kr_group_id']  = investment.get('cid', 0)
