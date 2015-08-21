@@ -7,6 +7,7 @@
 
 from spider_36kr.items import InvestorItem
 from scrapy.exporters import CsvItemExporter
+import os
 
 export_field = [
     'id',
@@ -26,7 +27,7 @@ export_field = [
 ]
 
 investor_filename           = 'investor'
-investor_company_filename   = 'investor_company'
+investor_startup_filename   = 'investor_startup'
 investor_work_filename      = 'investor_work'
 investor_investment_filename= 'investor_investment'
 
@@ -38,7 +39,7 @@ class InvestorPipeline(object):
 
     def open_spider(self, spider):
         self.add_exporter(investor_filename)
-        self.add_exporter(investor_company_filename)
+        self.add_exporter(investor_startup_filename)
         self.add_exporter(investor_work_filename)
         self.add_exporter(investor_investment_filename)
 
@@ -53,8 +54,8 @@ class InvestorPipeline(object):
     def process_item(self, item, spider):
         self.exporters[investor_filename]['exporter'].export_item(item)
 
-        for company in item['companys']:
-            self.exporters[investor_company_filename]['exporter'].export_item(company)
+        for startup in item['startups']:
+            self.exporters[investor_startup_filename]['exporter'].export_item(startup)
 
         for work in item['works']:
             self.exporters[investor_work_filename]['exporter'].export_item(work)
@@ -65,7 +66,9 @@ class InvestorPipeline(object):
         return item
 
     def add_exporter(self, filename):
-        file = open(filename + '.csv', 'w+b')
+        if not os.path.exists('result/'):
+            os.mkdir('result/')
+        file = open('result/' + filename + '.csv', 'w+b')
         self.exporters[filename] = {}
         self.exporters[filename]['file'] = file
         self.exporters[filename]['exporter'] = CsvItemExporter(

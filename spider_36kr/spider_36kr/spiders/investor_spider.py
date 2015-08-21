@@ -2,7 +2,7 @@
 
 import scrapy
 import simplejson as json
-from spider_36kr.items import InvestorItem, CompanyItem, WorkItem, InvestmentItem
+from spider_36kr.items import InvestorItem, StartupItem, WorkItem, InvestmentItem
 
 
 class InvestorSpider(scrapy.Spider):
@@ -10,14 +10,15 @@ class InvestorSpider(scrapy.Spider):
     start_urls      = ['https://rong.36kr.com/api/organization/investor']
     result          = {}
     investor_id     = 0
-    company_id      = 0
+    startup_id      = 0
     work_id         = 0
     investment_id   = 0
 
     def parse(self, response):
         data = json.loads(response.body)['data']
         pages = data['totalPages']
-        self.parse_page(response)
+        for it in self.parse_page(response):
+            yield it
 
         for i in range(1, pages):
             yield scrapy.Request('https://rong.36kr.com/api/organization/investor?page=%d' % (i + 1), callback = self.parse_page)
@@ -39,8 +40,6 @@ class InvestorSpider(scrapy.Spider):
             item['focusIntustry']   = ','.join(investor['user'].get('focusIntustry', {}).keys())
             item['investCount']     = investor['investComCount']
             item['investPhases']    = ','.join(investor.get('investPhases', []))
-            item['country']         = investor.get('country', '') # TODO
-            item['city']            = investor.get('city', '') #TODO
 
             request = scrapy.Request('https://rong.36kr.com/api/user/%d/basic' % kr_id, callback = self.parse_basic)
             request.meta['item'] = item
@@ -52,31 +51,33 @@ class InvestorSpider(scrapy.Spider):
         item = response.meta['item']
         item['school'] = ','.join(data.get('school', []))
         item['investorSettings'] = json.dumps(data.get('investorSettings', {}))
+        item['country']         = data.get('country', '')
+        item['city']            = data.get('city', '')
 
-        request = scrapy.Request('https://rong.36kr.com/api/user/%d/company' % item['kr_id'], callback = self.parse_company)
+        request = scrapy.Request('https://rong.36kr.com/api/user/%d/company' % item['kr_id'], callback = self.parse_startup)
         request.meta['item'] = item
         yield request
 
-    def parse_company(self, response):
+    def parse_startup(self, response):
         data = json.loads(response.body)['data']
         item = response.meta['item']
-        item['companys'] = []
+        item['startups'] = []
 
-        for company in data['expList']:
-            self.company_id += 1
+        for startup in data['expList']:
+            self.startup_id += 1
 
-            subitem                 = CompanyItem()
-            subitem['id']           = self.company_id
+            subitem                 = StartupItem()
+            subitem['id']           = self.startup_id
             subitem['investor_id']  = item['id']
             subitem['kr_id']        = item['kr_id']
-            subitem['brief']        = company.get('brief', '')
-            subitem['startDate']    = company.get('startDate', None)
-            subitem['endDate']      = company.get('endDate', None)
-            subitem['kr_group_id']  = company.get('groupId', 0)
-            subitem['groupName']    = company.get('groupName', '')
-            subitem['isCurrent']    = company.get('isCurrent', False)
-            subitem['position']     = company.get('positionString', '')
-            item['companys'].append(subitem)
+            subitem['brief']        = startup.get('brief', '')
+            subitem['startDate']    = startup.get('startDate', None)
+            subitem['endDate']      = startup.get('endDate', None)
+            subitem['kr_group_id']  = startup.get('groupId', 0)
+            subitem['groupName']    = startup.get('groupName', '')
+            subitem['isCurrent']    = startup.get('isCurrent', False)
+            subitem['position']     = startup.get('positionString', '')
+            item['startups'].append(subitem)
 
         request = scrapy.Request('https://rong.36kr.com/api/user/%d/work' % item['kr_id'], callback = self.parse_work)
         request.meta['item'] = item
