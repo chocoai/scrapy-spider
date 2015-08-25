@@ -8,7 +8,6 @@ from spider_36kr.items import InvestorItem, StartupItem, WorkItem, InvestmentIte
 class InvestorSpider(scrapy.Spider):
     name            = "investor"
     start_urls      = ['https://rong.36kr.com/api/organization/investor']
-    result          = {}
     investor_id     = 0
     startup_id      = 0
     work_id         = 0
