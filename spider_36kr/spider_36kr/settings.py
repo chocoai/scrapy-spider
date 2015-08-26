@@ -55,9 +55,12 @@ DOWNLOAD_DELAY=0.1
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.telnet.TelnetConsole': None,
-#}
+EXTENSIONS = {
+    'scrapy.telnet.TelnetConsole': None,
+    'scrapy.extensions.closespider.CloseSpider': 500,
+}
+
+CLOSESPIDER_ERRORCOUNT = 1
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
