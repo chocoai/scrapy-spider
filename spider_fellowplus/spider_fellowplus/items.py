@@ -10,6 +10,8 @@ import scrapy
 
 class InvestorItem(scrapy.Item):
     id              = scrapy.Field()
+    src_id          = scrapy.Field()
+    src             = scrapy.Field()
     name            = scrapy.Field()
     position        = scrapy.Field()
     brief           = scrapy.Field()

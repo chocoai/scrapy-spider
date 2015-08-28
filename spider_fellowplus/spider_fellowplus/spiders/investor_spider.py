@@ -29,6 +29,8 @@ class InvestorSpider(scrapy.Spider):
 
         item                = InvestorItem()
         item['id']          = self.investor_id
+        item['src']         = 'fellowplus'
+        item['src_id']      = response.url.split('/')[-2]
         item['name']        = soup.select_one('.section-profile h4').get_text()
         item['position']    = soup.select_one('.section-profile .position').get_text()
         item['brief']       = soup.select_one('.section-profile .foudation').get_text()

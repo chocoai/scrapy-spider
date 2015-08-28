@@ -11,6 +11,8 @@ import os
 
 export_field = [
     'id',
+    'src_id',
+    'src',
     'name',
     'position',
     'brief',
