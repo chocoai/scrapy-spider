@@ -11,7 +11,8 @@ import os
 
 export_field = [
     'id',
-    'kr_id',
+    'src_id',
+    'src',
     'name',
     'intro',
     'weibo',
@@ -21,6 +22,8 @@ export_field = [
     'investCount',
     'investPhases',
     'investorSettings',
+    'invest_lmt_person',
+    'invest_lmt_org',
     'country',
     'city',
     'school',

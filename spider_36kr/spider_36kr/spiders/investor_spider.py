@@ -8,7 +8,7 @@ from spider_36kr.items import InvestorItem, StartupItem, WorkItem, InvestmentIte
 class InvestorSpider(scrapy.Spider):
     name            = "investor"
     start_urls      = ['https://rong.36kr.com/api/organization/investor']
-    investor_id     = 0
+    investor_id     = 20000
     startup_id      = 0
     work_id         = 0
     investment_id   = 0
@@ -26,11 +26,12 @@ class InvestorSpider(scrapy.Spider):
         data = json.loads(response.body)['data']
         for investor in data['data']:
             self.investor_id += 1
-            kr_id = investor['user']['id']
+            src_id = investor['user']['id']
 
             item                    = InvestorItem()
             item['id']              = self.investor_id
-            item['kr_id']           = kr_id
+            item['src_id']          = src_id
+            item['src']             = '36kr'
             item['name']            = investor['user']['name']
             item['intro']           = investor['user'].get('intro', '')
             item['weibo']           = investor['user'].get('weibo', '')
@@ -40,20 +41,24 @@ class InvestorSpider(scrapy.Spider):
             item['investCount']     = investor['investComCount']
             item['investPhases']    = ','.join(investor.get('investPhases', []))
 
-            request = scrapy.Request('https://rong.36kr.com/api/user/%d/basic' % kr_id, callback = self.parse_basic)
+            request = scrapy.Request('https://rong.36kr.com/api/user/%d/basic' % src_id, callback = self.parse_basic)
             request.meta['item'] = item
             yield request
 
 
     def parse_basic(self, response):
         data = json.loads(response.body)['data']
-        item = response.meta['item']
-        item['school'] = ','.join(data.get('school', []))
-        item['investorSettings'] = json.dumps(data.get('investorSettings', {}))
-        item['country']         = data.get('country', '')
-        item['city']            = data.get('city', '')
 
-        request = scrapy.Request('https://rong.36kr.com/api/user/%d/company' % item['kr_id'], callback = self.parse_startup)
+        item                        = response.meta['item']
+        item['school']              = ','.join(data.get('school', []))
+        settings                    = data.get('investorSettings', {})
+        item['investorSettings']    = json.dumps(settings)
+        item['invest_lmt_person']   = settings
+        item['invest_lmt_org']      = settings
+        item['country']             = data.get('country', '')
+        item['city']                = data.get('city', '')
+
+        request = scrapy.Request('https://rong.36kr.com/api/user/%d/company' % item['src_id'], callback = self.parse_startup)
         request.meta['item'] = item
         yield request
 
@@ -68,7 +73,6 @@ class InvestorSpider(scrapy.Spider):
             subitem                 = StartupItem()
             subitem['id']           = self.startup_id
             subitem['investor_id']  = item['id']
-            subitem['kr_id']        = item['kr_id']
             subitem['brief']        = startup.get('brief', '')
             subitem['startDate']    = startup.get('startDate', None)
             subitem['endDate']      = startup.get('endDate', None)
@@ -78,7 +82,7 @@ class InvestorSpider(scrapy.Spider):
             subitem['position']     = startup.get('positionString', '')
             item['startups'].append(subitem)
 
-        request = scrapy.Request('https://rong.36kr.com/api/user/%d/work' % item['kr_id'], callback = self.parse_work)
+        request = scrapy.Request('https://rong.36kr.com/api/user/%d/work' % item['src_id'], callback = self.parse_work)
         request.meta['item'] = item
         yield request
 
@@ -93,7 +97,6 @@ class InvestorSpider(scrapy.Spider):
             subitem                 = WorkItem()
             subitem['id']           = self.work_id
             subitem['investor_id']  = item['id']
-            subitem['kr_id']        = item['kr_id']
             subitem['brief']        = work.get('brief', '')
             subitem['startDate']    = work.get('startDate', None)
             subitem['endDate']      = work.get('endDate', None)
@@ -103,7 +106,7 @@ class InvestorSpider(scrapy.Spider):
             subitem['position']     = work.get('positionString', '')
             item['works'].append(subitem)
 
-        request = scrapy.Request('https://rong.36kr.com/api/user/%d/past-investment' % item['kr_id'], callback = self.parse_investment)
+        request = scrapy.Request('https://rong.36kr.com/api/user/%d/past-investment' % item['src_id'], callback = self.parse_investment)
         request.meta['item'] = item
         yield request
 
@@ -118,7 +121,6 @@ class InvestorSpider(scrapy.Spider):
             subitem                 = InvestmentItem()
             subitem['id']           = self.investment_id
             subitem['investor_id']  = item['id']
-            subitem['kr_id']        = item['kr_id']
             subitem['kr_group_id']  = investment.get('cid', 0)
             subitem['name']         = investment.get('name', '')
             subitem['brief']        = investment.get('brief', '')
