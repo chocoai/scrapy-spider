@@ -10,7 +10,8 @@ import scrapy
 
 class InvestorItem(scrapy.Item):
     id          = scrapy.Field()
-    itjuzi_id   = scrapy.Field()
+    src_id      = scrapy.Field()
+    src         = scrapy.Field()
     name        = scrapy.Field()
     position    = scrapy.Field()
     weibo       = scrapy.Field()
@@ -20,15 +21,23 @@ class InvestorItem(scrapy.Item):
     school      = scrapy.Field()
     intustry    = scrapy.Field()
     investments = scrapy.Field()
+    works       = scrapy.Field()
 
 
 class InvestmentItem(scrapy.Item):
     id          = scrapy.Field()
     investor_id = scrapy.Field()
-    itjuzi_id   = scrapy.Field()
     name        = scrapy.Field()
     investDate  = scrapy.Field()
     phase       = scrapy.Field()
     amount      = scrapy.Field()
     company_url = scrapy.Field()
 
+
+class WorkItem(scrapy.Item):
+    id          = scrapy.Field()
+    investor_id = scrapy.Field()
+    name        = scrapy.Field()
+    position    = scrapy.Field()
+    startDate   = scrapy.Field()
+    endDate     = scrapy.Field()

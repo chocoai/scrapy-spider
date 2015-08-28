@@ -11,7 +11,8 @@ import os
 
 export_field = [
     'id',
-    'itjuzi_id',
+    'src_id',
+    'src',
     'name',
     'position',
     'weibo',
@@ -24,6 +25,7 @@ export_field = [
 
 investor_filename           = 'investor'
 investor_investment_filename= 'investor_investment'
+investor_work_filename      = 'investor_work'
 
 class InvestorPipeline(object):
 
@@ -34,6 +36,7 @@ class InvestorPipeline(object):
     def open_spider(self, spider):
         self.add_exporter(investor_filename)
         self.add_exporter(investor_investment_filename)
+        self.add_exporter(investor_work_filename)
 
         for key, value in self.exporters.items():
             value['exporter'].start_exporting()
@@ -48,6 +51,9 @@ class InvestorPipeline(object):
 
         for investment in item['investments']:
             self.exporters[investor_investment_filename]['exporter'].export_item(investment)
+
+        for work in item['works']:
+            self.exporters[investor_work_filename]['exporter'].export_item(work)
 
         return item
 
